@@ -69,28 +69,33 @@ function placeOrder(answers) {
     
     function (err, result, fields) {
       if (err) throw err;
-      var quantity = result.stock_quantity - answers.quantity;
-     if(quantity > 0) {
+      console.log(result[0].stock_quantity );
+      console.log(answers.quantity);
+     if(result[0].stock_quantity == 0) {
+      console.log("Sorry ! We are out of stock, please visit us later "); 
+      return;
+     }
+     
+     var quantity = result[0].stock_quantity-answers.quantity;
+      console.log(quantity );
+     if(quantity >= 0) {
         var query = con.query(
-          "UPDATE products SET ? WHERE ?",
-          [
-            {
-              stock_quantity: answers.quantity
-            },
-            {
-              item_id: answers.item_id
-            }
-          ],
+          "UPDATE products SET stock_quantity =" + quantity +" WHERE item_id =" + answers.item_id,
+          
           function(err, res) {
-          console.log(err); 
+          //console.log(err); 
           
             console.log(res.affectedRows + " products updated!\n");
             // Call deleteProduct AFTER the UPDATE completes
+            console.log("       You have been charged $" + parseFloat(answers.quantity*result[0].price));
             
           }
         );
      }
-     console.log(result);
+     else {
+      console.log("Sorry ! Only " + result[0].stock_quantity + " products available"); 
+     }
+     
     });
  
 
